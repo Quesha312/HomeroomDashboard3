@@ -59,6 +59,12 @@ button{cursor:pointer;border:none;border-radius:6px;padding:.4rem .9rem;font-siz
 @media(max-width:480px){#app{flex-direction:column;height:auto;}#sidebar{width:100%;max-height:200px;}#main{height:auto;}}
 @media print{header,#sidebar,#tabs{display:none!important;}#app{display:block;height:auto;}#lesson-content{padding:0;overflow:visible;}.lesson-box{break-inside:avoid;}}
 
+/* Block Plan — day tabs */
+.bp-day-tabs{display:flex;gap:.35rem;padding:.75rem 1.5rem .25rem;background:var(--bg);border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.bp-day-btn{background:#fff;border:1.5px solid var(--border);color:var(--text-muted);border-radius:20px;padding:.3rem .85rem;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s;}
+.bp-day-btn:hover{border-color:var(--primary);color:var(--primary);}
+.bp-day-btn.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+.bp-day-hd{padding:.6rem 1.5rem .2rem;font-size:.9rem;font-weight:700;color:var(--primary);}
 /* Block Plan */
 .bp-wrap{max-width:720px;margin:0 auto;padding:1.25rem 1.5rem 3rem;}
 .bp-hd{background:#1d4ed8;color:#fff;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;}

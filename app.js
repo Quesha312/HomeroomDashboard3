@@ -9,15 +9,16 @@
   }
   var UNITS = window.HR_UNITS;
   var TABS  = ["Weekly Overview", "Below Level", "On Level", " Block Plan"];
-  var state = { unit:0, week:0, tab:0 };
+  var state = { unit:0, week:0, tab:0, bpDay:0 };
 
-  function saveState() { try { localStorage.setItem("hr_nav", JSON.stringify({u:state.unit,w:state.week,t:state.tab})); } catch(e) {} }
+  function saveState() { try { localStorage.setItem("hr_nav", JSON.stringify({u:state.unit,w:state.week,t:state.tab,d:state.bpDay})); } catch(e) {} }
   function loadState() {
     try {
       var s = JSON.parse(localStorage.getItem("hr_nav") || "{}");
       if (typeof s.u === "number" && s.u < UNITS.length) state.unit = s.u;
       if (typeof s.w === "number" && s.w < UNITS[state.unit].weeks.length) state.week = s.w;
       if (typeof s.t === "number" && s.t < TABS.length) state.tab = s.t;
+      if (typeof s.d === "number" && s.d < 5) state.bpDay = s.d;
     } catch(e) {}
   }
 
@@ -78,7 +79,10 @@
   }
 
   function renderBlockPlan(W, U) {
-    var bpKey = "hr_block_u" + state.unit + "_w" + state.week;
+    var DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
+    var SHORT = ["Mon","Tue","Wed","Thu","Fri"];
+    var day = state.bpDay;
+    var bpKey = "hr_bp_u" + state.unit + "_w" + state.week + "_d" + day;
     var saved = {};
     try { saved = JSON.parse(localStorage.getItem(bpKey) || "{}"); } catch(e) {}
 
@@ -88,39 +92,50 @@
     }
 
     var h = "<div class='bp-wrap'>";
-    h += "<div class='bp-hd'><h2 class='bp-title'>\uD83D\uDCCB 90-Minute Block Plan</h2>";
-    h += "<div class='bp-sub'>Week " + W.w + " \u2014 <em>" + W.text + "</em>";
-    if (W.author) h += " <span style='font-weight:400;font-style:italic'>" + W.author + "</span>";
+
+    // Header
+    h += "<div class='bp-hd'>";
+    h += "<div class='bp-title'>\uD83D\uDCCB 5-Day Block Plan \u2014 Week " + W.w + "</div>";
+    h += "<div class='bp-sub'><em>" + W.text + "</em>";
+    if (W.author) h += " <span style='font-weight:400'>" + W.author + "</span>";
     h += "</div><div class='bp-eq'>" + U.eq + "</div></div>";
 
+    // Day selector tabs
+    h += "<div class='bp-day-tabs'>";
+    for (var d = 0; d < 5; d++) {
+      h += "<button class='bp-day-btn" + (d === day ? " active" : "") + "' data-day='" + d + "'>" + SHORT[d] + "</button>";
+    }
+    h += "</div>";
+
+    h += "<div class='bp-day-hd'>" + DAYS[day] + " \u2014 90-Minute Block</div>";
+
+    // Schedule
     h += "<div class='bp-sched'>";
     h += bpRow("0\u201310 min", "WARM UP", "bp-warmup",
-      "Morning meeting \u2022 Spiral review \u2022 <strong>Word Study preview:</strong> " + W.word);
+      "Spiral review \u2022 <strong>Word Study:</strong> " + W.word);
     h += bpRow("10\u201335 min", "WHOLE GROUP", "bp-whole",
-      "<strong>Build Knowledge + Read-Aloud:</strong> <em>" + W.text + "</em><br>" +
-      "<strong>Weekly Question:</strong> " + W.wq + "<br>" +
-      "<strong>Author\u2019s Craft:</strong> " + W.craft);
+      "<strong>Read-Aloud:</strong> <em>" + W.text + "</em> \u2022 <strong>Weekly Question:</strong> " + W.wq + "<br><strong>Craft:</strong> " + W.craft);
     h += bpRow("35\u201355 min", "WHOLE GROUP", "bp-whole",
-      "<strong>Skill Instruction:</strong> " + W.comp + "<br>" +
-      "<strong>Vocabulary:</strong> " + W.vocab);
+      "<strong>Skill:</strong> " + W.comp + " \u2022 <strong>Vocabulary:</strong> " + W.vocab);
     h += bpRow("55\u201375 min", "SMALL GROUPS", "bp-small",
-      "<strong>Teacher \u2192 Below Level:</strong> " + W.belowRes + "<br>" +
-      "<strong>Partner/Station \u2192 On Level:</strong> independent skill practice");
+      "<strong>Teacher \u2192 Below Level</strong> \u2022 " + W.belowRes + "<br><strong>Partner/Station \u2192 On Level</strong>");
     h += "</div>";
 
+    // Pull-out section (per-day)
     h += "<div class='bp-pullout'>";
-    h += "<div class='bp-po-hd'>\uD83D\uDD00 Pull-Out Window <span class='bp-po-hint'>(optional \u2014 edit & save)</span></div>";
+    h += "<div class='bp-po-hd'>\uD83D\uDD00 Pull-Out Window <span class='bp-po-hint'>(" + DAYS[day] + " \u2014 optional, saves per day)</span></div>";
     h += "<div class='bp-po-grid'>";
-    h += "<label class='bp-field'>Start Time<input class='bp-inp' id='bp-start' placeholder='e.g. 10:55 AM' value='" + (saved.start||"" )+ "'></label>";
-    h += "<label class='bp-field'>End Time<input class='bp-inp' id='bp-end' placeholder='e.g. 11:15 AM' value='" + (saved.end||"") + "'></label>";
-    h += "<label class='bp-field'>Who Pulls<input class='bp-inp' id='bp-who' placeholder='ELL Teacher' value='" + (saved.who||"ELL Teacher") + "'></label>";
+    h += "<label class='bp-field'>Start<input class='bp-inp' id='bp-start' value='" + (saved.start||"") + "' placeholder='e.g. 10:55 AM'></label>";
+    h += "<label class='bp-field'>End<input class='bp-inp' id='bp-end' value='" + (saved.end||"") + "' placeholder='e.g. 11:15 AM'></label>";
+    h += "<label class='bp-field'>Who Pulls<input class='bp-inp' id='bp-who' value='" + (saved.who||"ELL Teacher") + "'></label>";
     h += "</div>";
-    h += "<label class='bp-field' style='display:block;margin-top:.55rem'>Students Pulled<textarea class='bp-ta' id='bp-students' placeholder='Maria, Jose, Aiden'>" + (saved.students||"") + "</textarea></label>";
-    h += "<label class='bp-field' style='display:block;margin-top:.4rem'>Notes / Materials<textarea class='bp-ta' id='bp-notes' placeholder='e.g. bring decodable cards'>" + (saved.notes||"") + "</textarea></label>";
+    h += "<label class='bp-field' style='display:block;margin-top:.55rem'>Students Pulled<textarea class='bp-ta' id='bp-students'>" + (saved.students||"") + "</textarea></label>";
+    h += "<label class='bp-field' style='display:block;margin-top:.4rem'>Notes<textarea class='bp-ta' id='bp-notes'>" + (saved.notes||"") + "</textarea></label>";
     h += "<div style='margin-top:.75rem;display:flex;gap:.6rem;align-items:center'>";
-    h += "<button class='bp-save-btn' id='bp-save' data-key='" + bpKey + "'>Save Pull-Out Info</button>";
+    h += "<button class='bp-save-btn' id='bp-save' data-key='" + bpKey + "'>Save " + DAYS[day] + "</button>";
     h += "<span id='bp-ok' style='color:#16a34a;font-size:.82rem;display:none'>Saved \u2713</span></div></div>";
 
+    // Wrap-up
     h += "<div class='bp-sched'>";
     h += bpRow("75\u201390 min", "WRAP-UP", "bp-wrapup",
       "Independent reading \u2022 Writing response \u2022 Share out \u2022 Exit ticket");
@@ -129,6 +144,7 @@
     var el = document.getElementById("lesson-content");
     el.innerHTML = h;
 
+    // Wire save button
     var sb = document.getElementById("bp-save");
     if (sb) sb.addEventListener("click", function() {
       var p = { start:document.getElementById("bp-start").value.trim(),
@@ -138,8 +154,17 @@
                 notes:document.getElementById("bp-notes").value.trim() };
       try { localStorage.setItem(sb.dataset.key, JSON.stringify(p)); } catch(e) {}
       var ok = document.getElementById("bp-ok");
-      if (ok) { ok.style.display="inline"; setTimeout(function(){ ok.style.display="none"; }, 2500); }
+      if (ok) { ok.style.display="inline"; setTimeout(function(){ ok.style.display="none"; },2500); }
     });
+
+    // Wire day tabs
+    var btns = document.querySelectorAll(".bp-day-btn");
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].addEventListener("click", function() {
+        state.bpDay = parseInt(this.dataset.day, 10);
+        renderBlockPlan(W, U);
+      });
+    }
   }
 
   function renderLesson() {
