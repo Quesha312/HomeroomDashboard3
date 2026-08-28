@@ -9,9 +9,9 @@
   }
   var UNITS = window.HR_UNITS;
   var TABS  = ["Weekly Overview", "Below Level", "On Level", " Block Plan"];
-  var state = { unit:0, week:0, tab:0, bpDay:0 };
+  var state = { unit:0, week:0, tab:0, bpDay:0, section:"lesson" };
 
-  function saveState() { try { localStorage.setItem("hr_nav", JSON.stringify({u:state.unit,w:state.week,t:state.tab,d:state.bpDay})); } catch(e) {} }
+  function saveState() { try { localStorage.setItem("hr_nav", JSON.stringify({u:state.unit,w:state.week,t:state.tab,d:state.bpDay,s:state.section})); } catch(e) {} }
   function loadState() {
     try {
       var s = JSON.parse(localStorage.getItem("hr_nav") || "{}");
@@ -19,6 +19,7 @@
       if (typeof s.w === "number" && s.w < UNITS[state.unit].weeks.length) state.week = s.w;
       if (typeof s.t === "number" && s.t < TABS.length) state.tab = s.t;
       if (typeof s.d === "number" && s.d < 5) state.bpDay = s.d;
+      if (typeof s.s === "string") state.section = s.s;
     } catch(e) {}
   }
 
@@ -41,16 +42,20 @@
       }
       html += "</div>";
     }
+    html += "<button class='trk-sidebar-btn" + (state.section==="tracker" ? " active" : "") + "' data-section='tracker'>\uD83D\uDCCA Class Tracker</button>";
     document.getElementById("sidebar").innerHTML = html;
   }
 
   function renderTabs() {
+    var tabsEl = document.getElementById("tabs");
+    if (state.section === "tracker") { tabsEl.innerHTML = ""; tabsEl.style.display = "none"; return; }
+    tabsEl.style.display = "";
     var html = "";
     for (var i = 0; i < TABS.length; i++) {
       html += "<button class=\"tab-btn" + (i === state.tab ? " active" : "") +
               "\" data-tab=\"" + i + "\">" + TABS[i] + "</button>";
     }
-    document.getElementById("tabs").innerHTML = html;
+    tabsEl.innerHTML = html;
   }
 
   function chip(label, value) {
@@ -83,6 +88,47 @@
     var SHORT = ["Mon","Tue","Wed","Thu","Fri"];
     var day = state.bpDay;
     var bpKey = "hr_bp_u" + state.unit + "_w" + state.week + "_d" + day;
+
+    // Day-specific schedules — each day has genuinely different content
+    var SCHED = [
+      [ // Monday — Build Knowledge + Introduce Anchor Text
+        {t:"0\u201310",l:"WARM UP",c:"bp-warmup",x:"Word Study preview \u2022 <strong>"+W.word+"</strong> \u2022 Background knowledge activation"},
+        {t:"10\u201335",l:"WHOLE GROUP",c:"bp-whole",x:"<strong>Build Knowledge:</strong> Weekly Launch activity \u2022 Introduce Weekly Question: <em>"+W.wq+"</em>"},
+        {t:"35\u201355",l:"WHOLE GROUP",c:"bp-whole",x:"<strong>Begin Anchor Text Read-Aloud:</strong> <em>"+W.text+"</em> \u2022 Read first half \u2022 Model comprehension strategy"},
+        {t:"55\u201375",l:"SMALL GROUPS",c:"bp-small",x:"<strong>Below Level:</strong> Preview decodable with teacher \u2022 <strong>On Level:</strong> Preview anchor text vocabulary independently"},
+        {t:"75\u201390",l:"WRAP-UP",c:"bp-wrapup",x:"Talk About It \u2022 Initial response to Weekly Question \u2022 Preview vocabulary for tomorrow"}
+      ],
+      [ // Tuesday — Finish Text + Vocabulary + Skill Introduction
+        {t:"0\u201310",l:"WARM UP",c:"bp-warmup",x:"<strong>Vocabulary Preview:</strong> "+W.vocab+" \u2022 Academic word cards, partner discussion"},
+        {t:"10\u201335",l:"WHOLE GROUP",c:"bp-whole",x:"<strong>Finish Anchor Text:</strong> <em>"+W.text+"</em> \u2022 Discuss character, events, or main ideas"},
+        {t:"35\u201355",l:"WHOLE GROUP",c:"bp-whole",x:"<strong>Comprehension Skill Introduction:</strong> "+W.comp+" \u2022 Model with text evidence from anchor text"},
+        {t:"55\u201375",l:"SMALL GROUPS",c:"bp-small",x:"<strong>Below Level:</strong> "+W.belowRes+" \u2022 <strong>On Level:</strong> Apply comprehension skill with partner"},
+        {t:"75\u201390",l:"WRAP-UP",c:"bp-wrapup",x:"Write to Sources \u2022 Sentence frame response using comprehension skill"}
+      ],
+      [ // Wednesday — Skill Practice + Word Study + Differentiated Groups
+        {t:"0\u201310",l:"WARM UP",c:"bp-warmup",x:"<strong>Academic Vocabulary Review:</strong> "+W.vocab+" \u2022 Partner vocabulary practice"},
+        {t:"10\u201335",l:"WHOLE GROUP",c:"bp-whole",x:"<strong>Comprehension Skill Practice:</strong> "+W.comp+" \u2022 Guided practice with a new text example"},
+        {t:"35\u201355",l:"WHOLE GROUP",c:"bp-whole",x:"<strong>Word Study Introduction:</strong> "+W.word+" \u2022 Model pattern, word sort and practice together"},
+        {t:"55\u201375",l:"SMALL GROUPS",c:"bp-small",x:"<strong>Teacher \u2192 Below Level:</strong> comprehension skill focus \u2022 <strong>On Level:</strong> independent skill practice"},
+        {t:"75\u201390",l:"WRAP-UP",c:"bp-wrapup",x:"Share comprehension skill application \u2022 Add to anchor chart"}
+      ],
+      [ // Thursday — Author's Craft + Writing Response
+        {t:"0\u201310",l:"WARM UP",c:"bp-warmup",x:"<strong>Word Study Practice:</strong> "+W.word+" \u2022 Word sort, spelling practice"},
+        {t:"10\u201335",l:"WHOLE GROUP",c:"bp-whole",x:"<strong>Author's Craft:</strong> "+W.craft+" \u2022 Find examples in anchor text \u2022 Model analysis"},
+        {t:"35\u201355",l:"WHOLE GROUP",c:"bp-whole",x:"<strong>Write to Sources:</strong> Draft 2\u20133 sentence response with text evidence \u2022 Model planning and drafting"},
+        {t:"55\u201375",l:"SMALL GROUPS",c:"bp-small",x:"<strong>Peer Editing + Teacher Conferences:</strong> Students share drafts \u2022 Below Level gets sentence frame scaffold"},
+        {t:"75\u201390",l:"WRAP-UP",c:"bp-wrapup",x:"Author's Craft share-out \u2022 Build class anchor chart with examples"}
+      ],
+      [ // Friday — Wrap-Up + Reflect + Preview
+        {t:"0\u201310",l:"WARM UP",c:"bp-warmup",x:"<strong>Spiral Word Study Review:</strong> "+W.word+" \u2022 Quick practice / assessment prep"},
+        {t:"10\u201335",l:"WHOLE GROUP",c:"bp-whole",x:"<strong>Revisit Weekly Question:</strong> <em>"+W.wq+"</em> \u2022 Connect anchor text to unit theme"},
+        {t:"35\u201355",l:"WHOLE GROUP",c:"bp-whole",x:"<strong>Academic Vocabulary Wrap-Up:</strong> "+W.vocab+" \u2022 Vocabulary journal or review game"},
+        {t:"55\u201375",l:"SMALL GROUPS",c:"bp-small",x:"<strong>Independent Reading at Level</strong> \u2022 Students read leveled text \u2022 Teacher reteach group if needed"},
+        {t:"75\u201390",l:"WRAP-UP",c:"bp-wrapup",x:"Exit ticket \u2022 Reflect on Weekly Question \u2022 Preview next week"}
+      ]
+    ];
+
+    // (rest of function continues with same structure — see below)
     var saved = {};
     try { saved = JSON.parse(localStorage.getItem(bpKey) || "{}"); } catch(e) {}
 
@@ -111,14 +157,7 @@
 
     // Schedule
     h += "<div class='bp-sched'>";
-    h += bpRow("0\u201310 min", "WARM UP", "bp-warmup",
-      "Spiral review \u2022 <strong>Word Study:</strong> " + W.word);
-    h += bpRow("10\u201335 min", "WHOLE GROUP", "bp-whole",
-      "<strong>Read-Aloud:</strong> <em>" + W.text + "</em> \u2022 <strong>Weekly Question:</strong> " + W.wq + "<br><strong>Craft:</strong> " + W.craft);
-    h += bpRow("35\u201355 min", "WHOLE GROUP", "bp-whole",
-      "<strong>Skill:</strong> " + W.comp + " \u2022 <strong>Vocabulary:</strong> " + W.vocab);
-    h += bpRow("55\u201375 min", "SMALL GROUPS", "bp-small",
-      "<strong>Teacher \u2192 Below Level</strong> \u2022 " + W.belowRes + "<br><strong>Partner/Station \u2192 On Level</strong>");
+    SCHED[day].forEach(function(row){ h += bpRow(row.t, row.l, row.c, row.x); });
     h += "</div>";
 
     // Pull-out section (per-day)
@@ -195,17 +234,26 @@
     document.getElementById("lesson-content").innerHTML = h;
   }
 
-  function render() { renderSidebar(); renderTabs(); renderLesson(); saveState(); }
+  function render() {
+    renderSidebar(); renderTabs();
+    if (state.section === "tracker") {
+      if (window.HR_TRACKER) { HR_TRACKER.render(document.getElementById("lesson-content")); }
+      else { document.getElementById("lesson-content").innerHTML = "<div style='padding:2rem;color:#b91c1c'>hr_tracker.js not loaded — add &lt;script src=\"hr_tracker.js\"&gt;&lt;/script&gt; before app.js.</div>"; }
+    } else { renderLesson(); }
+    saveState();
+  }
 
   document.addEventListener("click", function (e) {
     var t = e.target;
     if (t.classList.contains("unit-title")) {
       var ug = t.parentElement;
-      if (ug && ug.dataset.unit !== undefined) { state.unit = parseInt(ug.dataset.unit,10); state.week = 0; state.tab = 0; render(); }
+      if (ug && ug.dataset.unit !== undefined) { state.unit = parseInt(ug.dataset.unit,10); state.week = 0; state.tab = 0; state.section = "lesson"; render(); }
     } else if (t.classList.contains("week-item")) {
-      state.unit = parseInt(t.dataset.unit,10); state.week = parseInt(t.dataset.week,10); state.tab = 0; render();
+      state.unit = parseInt(t.dataset.unit,10); state.week = parseInt(t.dataset.week,10); state.tab = 0; state.section = "lesson"; render();
     } else if (t.classList.contains("tab-btn")) {
       state.tab = parseInt(t.dataset.tab,10); render();
+    } else if (t.dataset && t.dataset.section) {
+      state.section = t.dataset.section; render();
     } else if (t.id === "print-btn") { window.print(); }
   });
 
