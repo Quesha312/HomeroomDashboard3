@@ -141,5 +141,40 @@
     {id:21,t:"Bird House Builders",wc:37,p:"Inside the garage, Ella and her dad built a small wooden birdhouse. They painted it bright blue and hung it up on a tree branch. Soon, a tiny bird flew inside to build a nest.",qs:[{l:1,q:"What did Ella and her dad build?",a:"A small wooden birdhouse"},{l:2,q:"What steps did they take to finish the birdhouse?",a:"Built it, painted it blue, hung it on a tree branch"},{l:3,q:"How do you know the birdhouse was a success? Use text evidence.",a:"A tiny bird flew inside to build a nest"},{l:4,q:"What can building something with a family member teach you?",a:"Open-ended"}]},
     {id:22,t:"The Evening Bike Ride",wc:38,p:"The bright sun started to set behind the hills. Ryan put on his black helmet and rode his red bicycle down the street. The cool night air felt nice on his face as he sped up.",qs:[{l:1,q:"What safety gear did Ryan wear?",a:"A black helmet"},{l:2,q:"Why is wearing a helmet important when riding a bike?",a:"To protect your head in case of a fall"},{l:3,q:"How does the author create a peaceful feeling?",a:"Setting sun, cool air, riding down a quiet street"},{l:4,q:"Why is wearing safety gear important for outdoor activities?",a:"Open-ended"}]}
   ];
+  function printStudentCopyHR(id){
+    var s=null; for(var i=0;i<HR_STORIES.length;i++){if(HR_STORIES[i].id===id){s=HR_STORIES[i];break;}} if(!s)return;
+    var h="<!DOCTYPE html><html><head><meta charset='UTF-8'><style>body{font-family:Georgia,serif;max-width:620px;margin:2.5rem auto;padding:0 1.5rem;font-size:13pt;line-height:1.75;}h1{font-size:1.1rem;font-weight:700;margin-bottom:.2rem;}h2{font-size:.88rem;color:#555;margin:0 0 1.25rem;}.ps{margin-bottom:1.75rem;border-bottom:1px solid #ccc;padding-bottom:1.5rem;}.ql{font-weight:700;font-size:.93rem;display:flex;gap:.4rem;margin-bottom:.25rem;}.dk{font-size:.75rem;background:#ede9fe;color:#6d28d9;border-radius:10px;padding:.1rem .4rem;font-weight:700;flex-shrink:0;}.al{border-bottom:1px solid #bbb;min-height:1.3rem;margin:.15rem 0 .5rem;}.pb{background:#166534;color:#fff;border:none;border-radius:6px;padding:.4rem 1rem;cursor:pointer;margin-top:.5rem;}@media print{.pb{display:none!important;}}</style></head><body>"
+      +"<h1>Story "+s.id+": "+s.t+"</h1><h2>"+s.wc+" words &bull; Name: ______________________________ &bull; Date: _____________</h2>"
+      +"<div class='ps'>"+s.p+"</div><div>";
+    s.qs.forEach(function(q,i){h+="<div class='ql'><span class='dk'>DOK "+q.l+"</span><span>"+(i+1)+". "+q.q+"</span></div><div class='al'></div><div class='al'></div>";});
+    h+="</div><button class='pb' onclick='window.print()'>&#128438; Print Student Copy</button></body></html>";
+    var w=window.open("","_blank","width=720,height=900"); if(w){w.document.write(h);w.document.close();}
+  }
+  function renderHrtPassages(el){
+    var h="<div style='padding:1rem 1.25rem'>"
+      +"<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:.7rem'>"
+      +"<strong>&#128218; Reading Passages</strong>"
+      +"<button id='hrt-pb-back' class='hrt-btn-sm'>&#8592; Back</button></div>"
+      +"<div style='font-size:.78rem;color:#64748b;margin-bottom:.7rem'>22 passages &bull; DOK 1&#8211;4 &bull; Student copies print without answers</div>";
+    HR_STORIES.forEach(function(s){
+      h+="<div style='background:#fff;border:1px solid var(--border);border-radius:8px;padding:.7rem .9rem;margin-bottom:.5rem'>"
+        +"<div style='display:flex;justify-content:space-between;align-items:center;gap:.5rem'>"
+        +"<strong style='font-size:.87rem'>Story "+s.id+": "+s.t+"</strong>"
+        +"<button class='hrt-stucopy' data-sid='"+s.id+"' style='font-size:.73rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:5px;padding:.2rem .55rem;cursor:pointer;white-space:nowrap;flex-shrink:0'>&#128438; Student Copy</button></div>"
+        +"<p style='font-size:.8rem;color:#475569;margin:.3rem 0 .3rem;line-height:1.55'>"+s.p+"</p>"
+        +"<div style='font-size:.74rem;line-height:1.6'>";
+      s.qs.forEach(function(q,i){
+        h+="<span style='background:#f1f5f9;border-radius:3px;padding:.05rem .3rem;margin:.1rem .2rem .1rem 0;display:inline-block'>DOK "+q.l+"</span> "+q.q+" <em style='color:#94a3b8'>&#8594; "+q.a+"</em><br>";
+      });
+      h+="</div></div>";
+    });
+    h+="</div>";
+    el.innerHTML=h;
+    var pb=document.getElementById("hrt-pb-back");
+    if(pb) pb.addEventListener("click",function(){renderInto(el);});
+    el.querySelectorAll(".hrt-stucopy").forEach(function(btn){
+      btn.addEventListener("click",function(){printStudentCopyHR(parseInt(this.dataset.sid,10));});
+    });
+  }
   window.HR_TRACKER = { render: renderInto };
 }());
