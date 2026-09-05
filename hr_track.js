@@ -3,7 +3,7 @@
 // At Risk → Sight Words | Some Risk → Fluency | Low Risk → Comprehension
 (function () {
   "use strict";
-  var KEY = "hr_tracker_v1";
+  var KEY = "hr_tracker";
   var GROUPS = {
     "Sight Words":   {icon:"\uD83D\uDD35", cls:"sw", desc:"VALLSS At Risk — intensive foundational & decoding support"},
     "Fluency":       {icon:"\uD83D\uDFE0", cls:"fl", desc:"VALLSS Some Risk — strategic fluency & word study support"},
