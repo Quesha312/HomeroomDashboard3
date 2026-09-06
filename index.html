@@ -9,7 +9,7 @@
 </head>
 <body>
   <!-- Main app container -->
-  <div id="app"></div>
+  <div id="app" style="padding:1rem;font-family:sans-serif"></div>
 
   <!-- Load passages first -->
   <script src="var_hr_stories.js"></script>
@@ -27,14 +27,14 @@
   <!-- Finally load your main app -->
   <script src="app.js"></script>
 
-  <!-- Minimal starter call to render tracker -->
+  <!-- Safety check: render tracker -->
   <script>
     document.addEventListener("DOMContentLoaded", function(){
       var el = document.getElementById("app");
-      if(window.HR_TRACKER){
+      if(window.HR_TRACKER && typeof HR_TRACKER.render === "function"){
         HR_TRACKER.render(el);
       } else {
-        el.innerHTML = "<p style='color:red'>Error: HR_TRACKER not loaded.</p>";
+        el.innerHTML = "<p style='color:red;font-weight:bold'>Error: HR_TRACKER not loaded. Check that hr_tracker.js is present, named correctly, and has <code>window.HR_TRACKER = { render: renderInto };</code> at the bottom.</p>";
       }
     });
   </script>
