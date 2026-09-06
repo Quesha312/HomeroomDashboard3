@@ -201,4 +201,9 @@ function renderHrtPassages(el){
 }
 
 // --- Export tracker globally ---
-window.HR_TRACKER = { render: renderInto };
+el.querySelectorAll(".hrt-stucopy").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      printStudentCopyHR(parseInt(this.dataset.sid,10));
+    });
+  });
+}
