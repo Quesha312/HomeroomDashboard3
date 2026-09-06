@@ -1,42 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Homeroom Reading Tracker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Optional stylesheet -->
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Homeroom Teacher Dashboard</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Main app container -->
-  <div id="app" style="padding:1rem;font-family:sans-serif"></div>
-
-  <!-- Load passages first -->
-  <script src="var_hr_stories.js"></script>
-
-  <!-- Load tracker logic -->
-  <script src="hr_tracker.js"></script>
-
-  <!-- Load your unit data files -->
-  <script src="data_u1.js"></script>
-  <script src="data_u2.js"></script>
-  <script src="data_u3.js"></script>
-  <script src="data_u4.js"></script>
-  <script src="data_u5.js"></script>
-
-  <!-- Finally load your main app -->
-  <script src="app.js"></script>
-
-  <!-- Safety check: render tracker -->
-  <script>
-    document.addEventListener("DOMContentLoaded", function(){
-      var el = document.getElementById("app");
-      if(window.HR_TRACKER && typeof HR_TRACKER.render === "function"){
-        HR_TRACKER.render(el);
-      } else {
-        el.innerHTML = "<p style='color:red;font-weight:bold'>Error: HR_TRACKER not loaded. Check that hr_tracker.js is present, named correctly, and has <code>window.HR_TRACKER = { render: renderInto };</code> at the bottom.</p>";
-      }
-    });
-  </script>
+<header>
+  <h1 id="hr-dash-title" title="Click to set your name" style="cursor:pointer">Homeroom Teacher Dashboard</h1>
+  <div class="header-controls">
+    <button id="print-btn">Print</button>
+  </div>
+</header>
+<div id="app">
+  <div id="sidebar"></div>
+  <div id="main">
+    <div id="tabs"></div>
+    <div id="lesson-content"></div>
+  </div>
+</div>
+<script src="data_u1.js"></script>
+<script src="data_u2.js"></script>
+<script src="data_u3.js"></script>
+<script src="data_u4.js"></script>
+<script src="data_u5.js"></script>
+<script src="hr_stories.js"></script>
+<script src="hr_tracker.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
