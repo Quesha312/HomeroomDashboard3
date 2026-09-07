@@ -637,9 +637,12 @@ function showHrtRoster(el,d){
   if(testToday.length){
     h+="<div style='background:#fef9c3;border:1.5px solid #fde047;border-radius:10px;padding:.7rem 1rem;margin-bottom:.8rem'>";
     h+="<div style='font-size:.85rem;font-weight:700;color:#713f12;margin-bottom:.35rem'>\uD83D\uDCC5 Test Today ("+todayDay+")</div>";
-    testToday.forEach(function(s){h+="<span class='hrt-scard' data-sid='"+s.id+"' style='display:inline-flex;align-items:center;gap:.35rem;padding:.22rem .55rem;background:#fff;border-radius:5px;margin:.15rem;cursor:pointer;border:1px solid #fde047;font-size:.82rem;font-weight:600;color:#0f172a'>"+s.name+" \u203a</span>";});
+    testToday.forEach(function(s){
+      h+="<span class='hrt-scard' data-sid='"+s.id+"' style='display:inline-flex;align-items:center;gap:.35rem;padding:.22rem .55rem;background:#fff;border-radius:5px;margin:.15rem;cursor:pointer;border:1px solid #fde047;font-size:.82rem;font-weight:600;color:#0f172a'>"+s.name+" \u203a</span>";
+    });
     h+="</div>";
   }
+
   h+="<div style='background:#f8faff;border:1.5px solid #e2e8f0;border-radius:10px;padding:.75rem 1rem;margin-bottom:.9rem'>";
   h+="<div style='font-size:.88rem;font-weight:700;color:#1e3a8a;margin-bottom:.4rem'>Add Student</div>";
   h+="<div style='display:flex;gap:.5rem;flex-wrap:wrap;align-items:flex-end'>";
@@ -647,29 +650,68 @@ function showHrtRoster(el,d){
   h+="<div><div style='font-size:.74rem;font-weight:600;color:#475569;margin-bottom:.15rem'>VALLSS Risk</div><select id='hrt-risk' style='padding:.3rem .5rem;border:1.5px solid #cbd5e1;border-radius:6px;font-size:.83rem'><option value=''>-- Select --</option><option>At Risk</option><option>Some Risk</option><option>Low Risk</option></select></div>";
   h+="<div><div style='font-size:.74rem;font-weight:600;color:#475569;margin-bottom:.15rem'>Testing Day</div><select id='hrt-day' style='padding:.3rem .5rem;border:1.5px solid #cbd5e1;border-radius:6px;font-size:.83rem'><option value=''>-- Select --</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option></select></div>";
   h+="<button id='hrt-add-btn' style='padding:.35rem .9rem;background:#1e40af;color:#fff;border:none;border-radius:6px;font-size:.83rem;font-weight:600;cursor:pointer'>+ Add</button></div></div>";
-  [["Sight Words","\uD83D\uDD35","#eff6ff","#bfdbfe","#1e40af"],["Fluency","\uD83D\uDFE0","#fff7ed","#fed7aa","#c2410c"],["Comprehension","\uD83D\uDFE2","#f0fdf4","#bbf7d0","#166534"]].forEach(function(sta){
+
+  [["Sight Words","\uD83D\uDD35","#eff6ff","#bfdbfe","#1e40af"],
+   ["Fluency","\uD83D\uDFE0","#fff7ed","#fed7aa","#c2410c"],
+   ["Comprehension","\uD83D\uDFE2","#f0fdf4","#bbf7d0","#166534"]].forEach(function(sta){
+
     var grp=sts.filter(function(s){return s.group===sta[0];});
     h+="<div style='background:"+sta[2]+";border:1.5px solid "+sta[3]+";border-radius:10px;padding:.75rem 1rem;margin-bottom:.6rem'>";
     h+="<div style='font-size:.85rem;font-weight:700;color:"+sta[4]+";margin-bottom:.4rem'>"+sta[1]+" "+sta[0]+" <span style='font-weight:400;font-size:.77rem;color:#94a3b8'>("+grp.length+")</span></div>";
-    if(!grp.length){h+="<div style='font-size:.77rem;color:#94a3b8;font-style:italic'>No students yet</div>";}
+
+    if(!grp.length){
+      h+="<div style='font-size:.77rem;color:#94a3b8;font-style:italic'>No students yet</div>";
+    }
+
     grp.forEach(function(s){
-      var le=s.entries&&s.entries.length?s.entries[s.entries.length-1]:null,sc2="No sessions";
-      if(le){if(s.group==="Sight Words")sc2=(le.score||0)+"% mastery";else if(s.group==="Fluency")sc2=(le.wpm||0)+" WPM";else{var dp=(le.d1q1?1:0)+(le.d1q2?1:0)+(le.d2q1?2:0)+(le.d2q2?2:0)+(le.d3q1?3:0)+(le.d3q2?3:0)+(le.d4q1?4:0)+(le.d4q2?4:0);sc2=dp+"/20 pts";}}
+      var le=s.entries&&s.entries.length?s.entries[s.entries.length-1]:null,
+          sc2="No sessions";
+
+      if(le){
+        if(s.group==="Sight Words") sc2=(le.score||0)+"% mastery";
+        else if(s.group==="Fluency") sc2=(le.wpm||0)+" WPM";
+        else {
+          var dp=(le.d1q1?1:0)+(le.d1q2?1:0)+(le.d2q1?2:0)+(le.d2q2?2:0)+(le.d3q1?3:0)+(le.d3q2?3:0)+(le.d4q1?4:0)+(le.d4q2?4:0);
+          sc2=dp+"/20 pts";
+        }
+      }
+
       var tb=s.testDay?"<span style='font-size:.68rem;color:#92400e;background:#fef9c3;border-radius:3px;padding:.05rem .25rem;margin-left:.25rem'>"+s.testDay.slice(0,3)+"</span>":"";
+
       h+="<div class='hrt-scard' data-sid='"+s.id+"' style='display:flex;justify-content:space-between;align-items:center;padding:.38rem .6rem;background:rgba(255,255,255,.75);border-radius:7px;margin:.2rem 0;cursor:pointer;border:1px solid "+sta[3]+"'><span style='font-size:.85rem;font-weight:600;color:#0f172a'>"+s.name+tb+"</span><span style='font-size:.75rem;color:"+sta[4]+"'>"+sc2+" \u203a</span></div>";
     });
+
     h+="</div>";
   });
-  if(!sts.length){h+="<div style='text-align:center;padding:2rem;color:#94a3b8'>Add your first student above.</div>";}
-  h+="<button id='hrt-pass-btn' style='margin-top:.6rem;font-size:.78rem;padding:.28rem .7rem;border:1.5px solid #e2e8f0;border-radius:6px;background:#fff;cursor:pointer;color:#475569'>\uD83D\uDCDA View / Print Passages</button> <button id="hrt-sheets-btn" style="margin-top:.6rem;font-size:.78rem;padding:.28rem .7rem;border:1.5px solid #ddd6fe;border-radius:6px;background:#faf5ff;cursor:pointer;color:#7c3aed">&#9881;&#65039; Sheets</button></div>";
+
+  if(!sts.length){
+    h+="<div style='text-align:center;padding:2rem;color:#94a3b8'>Add your first student above.</div>";
+  }
+
+  h+="<button id='hrt-pass-btn' style='margin-top:.6rem;font-size:.78rem;padding:.28rem .7rem;border:1.5px solid #e2e8f0;border-radius:6px;background:#fff;cursor:pointer;color:#475569'>\uD83D\uDCDA View / Print Passages</button> ";
+  h+="<button id='hrt-sheets-btn' style='margin-top:.6rem;font-size:.78rem;padding:.28rem .7rem;border:1.5px solid #ddd6fe;border-radius:6px;background:#faf5ff;cursor:pointer;color:#7c3aed'>&#9881;&#65039; Sheets</button></div>";
+
   el.innerHTML=h;
+
   var ab=document.getElementById("hrt-add-btn");
   if(ab)ab.addEventListener("click",function(){
-    var nm=(document.getElementById("hrt-name")||{}).value.trim(),risk=(document.getElementById("hrt-risk")||{}).value,day=(document.getElementById("hrt-day")||{}).value;
-    if(!nm){alert("Enter a student name.");return;}if(!risk){alert("Select a VALLSS risk level.");return;}if(!day){alert("Select a testing day.");return;}
-    var d2=load(),ns={id:uid(),name:nm,risk:risk,group:RISK_MAP[risk],testDay:day,entries:[]};
-    d2.students.push(ns);save(d2);_hrid=ns.id;renderInto(el);
+    var nm=(document.getElementById("hrt-name")||{}).value.trim(),
+        risk=(document.getElementById("hrt-risk")||{}).value,
+        day=(document.getElementById("hrt-day")||{}).value;
+
+    if(!nm){alert("Enter a student name.");return;}
+    if(!risk){alert("Select a VALLSS risk level.");return;}
+    if(!day){alert("Select a testing day.");return;}
+
+    var d2=load(),
+        ns={id:uid(),name:nm,risk:risk,group:RISK_MAP[risk],testDay:day,entries:[]};
+
+    d2.students.push(ns);
+    save(d2);
+    _hrid=ns.id;
+    renderInto(el);
   });
+
   el.addEventListener("click",function(e){
     var c=e.target.closest?e.target.closest(".hrt-scard"):null;
     if(c&&c.dataset.sid){_hrid=c.dataset.sid;renderInto(el);}
